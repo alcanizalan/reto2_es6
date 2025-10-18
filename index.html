@@ -44,7 +44,7 @@
             form.addEventListener('submit', function(event){
                 event.preventDefault();
                 const intento = form.intento.value;
-                if(intento.length > 0 && contadorIntentos <= 10){
+                if(intento.length > 0 && contadorIntentos < 10){
                     contadorIntentos++;
                     letraValida = false;
                     if(contadorIntentos >= 10){
