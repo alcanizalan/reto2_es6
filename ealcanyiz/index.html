@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Document</title>
+</head>
+<body>
+    <main>
+        <div id="panelFracaso">
+            <div>
+                <p>Has fallado!!</p>
+                <p id="palabraFinal"></p>
+                <button onclick="location.reload()">Reiniciar</button>
+            </div>
+        </div>
+        <div id="panelVictoria">
+            <div>
+                <p>Has ganado!!</p>
+                <button onclick="location.reload()">Reiniciar</button>
+            </div>
+        </div>
+        <div>
+            <p id="palabra"></p>
+            <form id="miFormulario">
+                <input type="text" name="intento" id="intento">
+                <input type="submit" value="Enviar">
+            </form>
+            <p id="letrasContenidas"></p>
+            <p id="resultado"></p>
+        </div>
+    </main>
+     <script>
+
+        function juegoPalabra(palabraWordle) {
+            let contadorIntentos = 0;
+            let intentoAntiguo = "";
+            let letrasContenidas = [];
+            let letraValida = null;
+            document.getElementById("resultado").innerHTML = "Palabra de " + palabraWordle.length + " letras, tienes 10 intentos.";
+            document.querySelector("#intento").setAttribute("maxlength", palabraWordle.length);
+            const form = document.getElementById('miFormulario');
+            form.addEventListener('submit', function(event){
+                event.preventDefault();
+                const intento = form.intento.value;
+                if(intento.length > 0 && contadorIntentos < 10){
+                    contadorIntentos++;
+                    letraValida = false;
+                    if(contadorIntentos >= 10){
+                        document.getElementById('panelFracaso').style.display = 'flex';
+                        document.getElementById('palabraFinal').innerText = "La palabra era: " + palabraWordle;
+                    }
+                    intentoArray = intento.split("");
+                    palabraArray = palabraWordle.split("");
+                    palabraEncriptada = "";
+                    
+                    for (let i = 0; i < intentoArray.length; i++) {
+                        if(palabraArray.includes(intentoArray[i]) && !letrasContenidas.includes(intentoArray[i])){
+                            letrasContenidas.push(intentoArray[i]);
+                        }
+                    }
+                    
+                    for (let i = 0; i < palabraArray.length; i++) {
+                        if(intentoArray[i] === palabraArray[i]){
+                            palabraEncriptada = palabraEncriptada + " " +intentoArray[i];
+                        }
+                        else{
+                            palabraEncriptada = palabraEncriptada + " " + "_";
+                        }
+                    }
+                        if(intentoArray.length > palabraArray.length){
+                                palabraEncriptada = palabraEncriptada + "...";
+                        }
+                    if (contadorIntentos==1){
+                        intentoAntiguo = palabraEncriptada;
+                    }else{
+                        intentoAntiguo = intentoAntiguo + "<br>" + palabraEncriptada;
+                    }
+                    document.getElementById("resultado").innerHTML = intentoAntiguo;
+                    if(intento === palabraWordle){
+                        document.getElementById("panelVictoria").style.display = 'flex';
+                    }
+                    document.getElementById("letrasContenidas").innerHTML = "Letras contenidas: " + letrasContenidas.join(", ");
+                }
+                
+            })
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            function buscarPalabraValida() {
+                fetch('https://rae-api.com/api/random')
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(palabra => {
+                        let palabraWordle = palabra.data.word;
+                        if(palabraWordle.length > 8){
+                            console.log(`Palabra "${palabraWordle}" demasiado larga (${palabraWordle.length} letras), buscando otra...`);
+                            buscarPalabraValida(); 
+                            return; 
+                        }
+                        
+                        console.log(`Palabra encontrada: "${palabraWordle}" (${palabraWordle.length} letras)`);
+                        juegoPalabra(palabraWordle);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching the file:', error);
+                        setTimeout(buscarPalabraValida, 1000);
+                    });
+            }
+            
+            buscarPalabraValida();
+        });
+
+
+    </script>
+</body>
+</html>
