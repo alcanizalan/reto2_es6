@@ -7,6 +7,7 @@
     <title>Película del Día</title>
 </head>
 <body>
+    <!-- codigo html con sus respectivos ids -->
     <div class="container">
         <h1>Película del la Temporada</h1>
         <div class="pelicula">
@@ -20,38 +21,46 @@
                         <p><strong>Puntuación global:</strong> <span id="puntuacionPelicula"></span></p>
                     </div>
                     <div>
+                        <!-- formulario para dejar comentario -->
                         <form id="formularioComentario" method="get" action="">
                             <label for="notaUsuario">Deja tu nota:</label>
                             <input type="number" id="notaUsuario" name="nota" min="0" max="10" step="1" required>
                             <label for="comentarioUsuario">Deja tu comentario:</label>
-                            <textarea id="comentarioUsuario" name="comentario" rows="4" placeholder="Escribe tu comentario aquí..." required></textarea>
+                            <textarea id="comentarioUsuario" name="comentario" rows="4" maxlength="250" placeholder="Escribe tu comentario aquí..." required></textarea>
                             <button type="submit">Enviar</button>
                         </form>
+                        <!--  -->
                         <p id="mensajeConfirmacion"></p>
                     </div>
                 </div>
             </div>
-            <!-- Botón para cargar una nueva película -->
+            <!-- botón para cargar una nueva película -->
             <button onClick="location.reload()">Cargar Película</button>
         </div>
     </div>
-    
+    <!-- importamos jquery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        //hasta que el html y css no esté pintado no podrá ejecutarse en js del interior
         $(document).ready(function() {
+            //llamamos a la api
             $.ajax({
                 url: "https://api.themoviedb.org/3/movie/popular",
+                //definimos el metodo
                 method: "GET",
+                // en este caso la api necesita autorización por token
                 headers: {
                     Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyYWI2N2Q1OTE4M2Y1ODNhYjcxNDljZjRkMDNjN2I4MSIsIm5iZiI6MTc2MDk4MDQ4Ny4wNTEsInN1YiI6IjY4ZjY2ZTA3NWZhMjZkNDExNTEwMWZiNCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.95gawHrzV9ENwclI5Euy8MBAzXjI5VfViA5e1Op6HaI",
                     accept: "application/json"
                 },
+                //si la llamada es correcta empezará el codigo principal
                 success: function(data) {
                     const peliculas = data.results;
                     
-                    // Seleccionar una película aleatoria
+                    // seleccionar una película aleatoria
                     const peliculaAleatoria = peliculas[Math.floor(Math.random() * peliculas.length)];
                     
+                    // imprime en pantalla toda la información de la película seleccionada
                     $("#tituloPelicula").text(peliculaAleatoria.title);
                     $("#posterPelicula").attr("src", `https://image.tmdb.org/t/p/w300${peliculaAleatoria.poster_path}`);
                     $("#overviewPelicula").text(peliculaAleatoria.overview);
@@ -60,22 +69,25 @@
                 }
             });
 
+            //callback llamado por la función mensajeConfirmacion
             function recuperarNota(nota){
                 $("#mensajeConfirmacion").text(`Tu calificación de ${nota} ha sido enviada!!`);
             }
 
+            //funcion que recibe un callback
             function mensajeConfirmacion(callback){
                 callback($("#notaUsuario").val());
             }
 
-            // Manejar el envío del formulario
+            // envío del formulario
             $("#formularioComentario").on("submit", function(e) {
-                // Prevenir el comportamiento por defecto (refrescar la página)
+                // que no refresque la página al enviar
                 e.preventDefault();
-
+                //recupera la nota y muestra el mensaje de confirmación usando callback
+                //funcion que le pasamos una funcion como parametro
                 mensajeConfirmacion(recuperarNota);
 
-                // Limpiar el formulario
+                // limpia el formulario
                 $("#notaUsuario").val("");
                 $("#comentarioUsuario").val("");
                 
